@@ -29,21 +29,24 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+// แก้ไขในส่วน _HomeScreenState
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const OpenMap()),
-              );
-            },
-            child: const Text("Open Map")
-          ),
-        ),
-      );
+      body: Stack(
+        children: [
+          //Map
+          const OpenMap(), 
+
+          //Search Bar
+
+
+          //Dashboard 
+          
+
+        ],
+      ),
+    );
   }
 }

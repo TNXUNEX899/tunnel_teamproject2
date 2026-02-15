@@ -12,8 +12,8 @@ class OpenMap extends StatefulWidget {
 
 class _OpenMapState extends State<OpenMap> {
   static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
+    target: LatLng(13.7563, 100.5018),
+    zoom: 12,
   ); 
 
   final Completer<GoogleMapController> _controller =
