@@ -3,6 +3,9 @@
         android:label="teamproject2"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyARqIvxtdc4JiHrLI_a8lv1c2q_2gqazVU"/>
+        <uses-library android:name="org.apache.http.legacy" android:required="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
