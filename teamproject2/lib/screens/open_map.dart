@@ -65,7 +65,7 @@ class _OpenMapState extends State<OpenMap> {
                 // markers: _buildMarkers(locationProvider.currentLocation),
                 initialCameraPosition: CameraPosition(
                   target: locationProvider.currentLocation,
-                  zoom: 14,
+                  zoom: 17,
                 ),
                 myLocationEnabled: true,
                 myLocationButtonEnabled: false,
