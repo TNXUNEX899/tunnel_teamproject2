@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:teamproject2/provider/current_location_provider.dart'; 
 import 'package:teamproject2/screens/open_map.dart';
 
 void main() {
@@ -33,19 +35,18 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          //Map
-          const OpenMap(), 
-
-          //Search Bar
-
-
-          //Dashboard 
-          
-
-        ],
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CurrentLocationProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Flood Tunnel Alert',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          useMaterial3: true,
+        ),
+        home: const OpenMap(), 
       ),
     );
   }
