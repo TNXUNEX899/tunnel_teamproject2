@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -11,23 +9,13 @@ class OpenMap extends StatefulWidget {
 }
 
 class _OpenMapState extends State<OpenMap> {
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(13.7563, 100.5018),
-    zoom: 12,
-  ); 
-
-  final Completer<GoogleMapController> _controller =
-    Completer<GoogleMapController>();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       body: GoogleMap(
-        mapType: MapType.hybrid,
-        initialCameraPosition: _kGooglePlex,
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
+        initialCameraPosition: CameraPosition(
+          target: LatLng(27.70, 85.30)),
       ),
     );
   }
