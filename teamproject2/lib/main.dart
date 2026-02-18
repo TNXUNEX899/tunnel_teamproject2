@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:teamproject2/screens/open_map.dart';
 import 'package:provider/provider.dart';
 import 'package:teamproject2/provider/current_location_provider.dart'; 
-import 'package:teamproject2/screens/open_map.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 

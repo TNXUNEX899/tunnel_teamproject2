@@ -15,9 +15,27 @@ class _OpenMapState extends State<OpenMap> {
   GoogleMapController? mapController;
   bool isOnline = true;
 
+  //callback when google map is ready
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
+
+  //create markers for current location on map(ตัวอย่าง)
+  // Set<Marker> _buildMarkers(LatLng currentLocation) {
+  //   return {
+  //     Marker(
+  //       markerId: MarkerId("current_location"),
+  //       position: currentLocation,
+  //       infoWindow: InfoWindow(
+  //         title: "Current Location",
+  //         snippet: "You are here!",
+  //       ),
+  //       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+  //     ),
+  //   };
+  // }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +43,7 @@ class _OpenMapState extends State<OpenMap> {
       backgroundColor: Colors.grey[100],
       body: Consumer<CurrentLocationProvider>(
         builder: (context, locationProvider, child) {
+          //show loading spinner while getting location
           if(locationProvider.isLoading) {
           return Center(
             child: Column(
@@ -37,6 +56,7 @@ class _OpenMapState extends State<OpenMap> {
               ),
             );
           }
+          //show loading spinner while getting location
           if(locationProvider.errorMessage.isNotEmpty){
             WidgetsBinding.instance.addPostFrameCallback((_) {
               showAppSnackbar(
@@ -47,8 +67,10 @@ class _OpenMapState extends State<OpenMap> {
           }
           return Stack(
             children: [
+              //display the googlemap
               GoogleMap(
                 onMapCreated: _onMapCreated,
+                //markers: _buildMarkers(locationProvider.currentLocation),
                 initialCameraPosition: CameraPosition(
                   target: locationProvider.currentLocation,
                   zoom: 17,
