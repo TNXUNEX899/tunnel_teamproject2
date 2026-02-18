@@ -19,19 +19,6 @@ class _OpenMapState extends State<OpenMap> {
     mapController = controller;
   }
 
-  // Set<Marker> _buildMarkers(LatLng currentLocation) {
-  //   return {
-  //     Marker(
-  //       markerId: MarkerId("current_location"),
-  //       position: currentLocation,
-  //       infoWindow: InfoWindow(
-  //         title: "You are here",
-  //         snippet: "You are here"),
-  //       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-  //     ),
-  //   };
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,7 +49,6 @@ class _OpenMapState extends State<OpenMap> {
             children: [
               GoogleMap(
                 onMapCreated: _onMapCreated,
-                // markers: _buildMarkers(locationProvider.currentLocation),
                 initialCameraPosition: CameraPosition(
                   target: locationProvider.currentLocation,
                   zoom: 17,
@@ -71,7 +57,6 @@ class _OpenMapState extends State<OpenMap> {
                 myLocationButtonEnabled: false,
                 mapType: MapType.normal,
               ),
-              
             ],
           );
         },
