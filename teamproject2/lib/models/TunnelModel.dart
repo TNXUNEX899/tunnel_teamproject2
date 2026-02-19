@@ -1,3 +1,4 @@
+// คลาสเดิมของคุณ (สำหรับค่า Real-time)
 class TunnelModel {
   final String id;
   final String color;
@@ -17,7 +18,7 @@ class TunnelModel {
     required this.status,
   });
 
-  factory TunnelModel.fromMap(String id, Map<dynamic, dynamic> map) { // เปลี่ยนชื่อ factory
+  factory TunnelModel.fromMap(String id, Map<dynamic, dynamic> map) {
     return TunnelModel(
       id: id,
       color: map['color'] ?? 'UNKNOWN',
@@ -28,16 +29,20 @@ class TunnelModel {
       status: map['status'] ?? false,
     );
   }
+}
 
-  // เผื่อต้องส่งค่ากลับขึ้น Firebase (ตอนนี้ยังไม่ได้ใช้ แต่มีไว้ดีกว่า)
-  // Map<String, dynamic> toMap() {
-  //   return {
-  //     'color': color,
-  //     'distance': distance,
-  //     'lat': latitude,
-  //     'lng': longitude,
-  //     'percent': percent,
-  //     'status': status,
-  //   };
-  // }
+// เพิ่มคลาสนี้เข้าไปข้างล่าง (สำหรับข้อมูลกราฟโดยเฉพาะ)
+class WaterLevelHistory {
+  final DateTime time;
+  final double percent;
+
+  WaterLevelHistory({required this.time, required this.percent});
+
+  factory WaterLevelHistory.fromMap(Map<dynamic, dynamic> map) {
+    return WaterLevelHistory(
+      // แปลงจาก timestamp ที่ ESP32 ส่งมา
+      time: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] ?? 0),
+      percent: (map['percent'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
 }
