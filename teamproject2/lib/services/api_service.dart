@@ -6,7 +6,7 @@ const String apiKey = "77a47fc4a5fd4b0c882175657261702"; // used your api key
 
 //for hourly forecast
 class WeatherApiService {
-  final String _baseUrl = "https://www.weatherapi.com/v1";
+  final String _baseUrl = "https://api.weatherapi.com/v1";
   Future<Map<String, dynamic>> getHourlyForecast(double lat, double lon) async {
     final url = Uri.parse(
       "$_baseUrl/forecast.json?key=$apiKey&q=$lat,$lon&days=7",
