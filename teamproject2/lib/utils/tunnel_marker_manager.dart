@@ -45,13 +45,12 @@ class TunnelMarkerManager {
       final greenBytes = await _getBytesFromAsset('assets/pin_green.png', pinWidth);
       _pinGreen = BitmapDescriptor.fromBytes(greenBytes);
 
-      /*
       final yellowBytes = await _getBytesFromAsset('assets/pin_yellow.png', pinWidth);
       _pinYellow = BitmapDescriptor.fromBytes(yellowBytes);
 
       final redBytes = await _getBytesFromAsset('assets/pin_red.png', pinWidth);
       _pinRed = BitmapDescriptor.fromBytes(redBytes);
-      */
+      
     } catch (e) {
       debugPrint('Error loading custom pins: $e');
     }

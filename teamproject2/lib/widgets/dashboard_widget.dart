@@ -35,68 +35,75 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<UmongStatus>(
-      stream: _firebaseService.getRealtimeStatus(widget.umongId),
-      builder: (context, statusSnapshot) {
-        if (statusSnapshot.connectionState == ConnectionState.waiting) {
-           return const Card(child: Padding(padding: EdgeInsets.all(40), child: Center(child: CircularProgressIndicator())));
-        }
+    final currentTime = DateFormat('HH:mm').format(DateTime.now());
 
-        final statusData = statusSnapshot.data;
-        final percent = statusData?.percent ?? 0.0;
-        final colorStr = statusData?.color ?? 'GRAY'; 
-        
-        final statusColor = _mapStatusColor(colorStr);
-        final currentTime = DateFormat('HH:mm').format(DateTime.now());
-
-        return Column(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 4),
+    // ⭐️ เอา StreamBuilder อันใหญ่ออกไป แล้ววาด Column กับกล่องขาวรอไว้เลย
+    return Column(
+      children: [
+        // --- ส่วนบน: สถานะปัจจุบัน ---
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                spreadRadius: 1,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.locationName, 
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'เวลา $currentTime น.', 
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.locationName, 
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'เวลา $currentTime น.', 
-                        style: TextStyle(fontSize: 14, color: Colors.grey[700]),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
+              const SizedBox(height: 24),
+              
+              // ⭐️ ย้าย StreamBuilder มาครอบเฉพาะส่วนที่จะเปลี่ยนค่า (กล่องสี + ตัวเลข)
+              StreamBuilder<UmongStatus>(
+                stream: _firebaseService.getRealtimeStatus(widget.umongId),
+                builder: (context, statusSnapshot) {
+                  if (statusSnapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox(
+                      height: 140, 
+                      child: Center(child: CircularProgressIndicator())
+                    );
+                  }
+
+                  final statusData = statusSnapshot.data;
+                  final percent = statusData?.percent ?? 0.0;
+                  final colorStr = statusData?.color ?? 'GRAY'; 
                   
-                  Row(
+                  final statusColor = _mapStatusColor(colorStr);
+
+                  return Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
                         width: 140,
                         height: 140,
                         decoration: BoxDecoration(
-                          color: statusColor,
+                          color: statusColor, // ⭐️ สีเปลี่ยนตรงนี้แบบนุ่มๆ
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Column(
@@ -116,11 +123,10 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                             const Text('status', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 8),
                             Text(
-                              'ปริมาตรน้ำ : ${percent.toStringAsFixed(1)} %', 
+                              'ปริมาตรน้ำ : ${percent.toStringAsFixed(1)} %', // ⭐️ ตัวเลขเปลี่ยนตรงนี้
                               style: const TextStyle(fontSize: 16),
                             ),
                             const SizedBox(height: 8),
-                            // ⭐️ เอา fontWeight: FontWeight.bold ออกไปแล้วครับ
                             Text(
                               'สถานะ: ${_mapStatusText(colorStr)}', 
                               style: const TextStyle(
@@ -132,129 +138,129 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                         ),
                       ),
                     ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        
+        const SizedBox(height: 16),
+
+        // --- ส่วนล่าง: กราฟประวัติ (แยก StreamBuilder อิสระแล้ว) ---
+        StreamBuilder<List<WaterLevelData>>(
+          stream: _firebaseService.getHistoryStream(widget.umongId),
+          builder: (context, historySnapshot) {
+            final historyList = historySnapshot.data ?? [];
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
-            ),
-            
-            const SizedBox(height: 16),
-
-            // --- ส่วนล่าง: กราฟประวัติ ---
-            StreamBuilder<List<WaterLevelData>>(
-              stream: _firebaseService.getHistoryStream(widget.umongId),
-              builder: (context, historySnapshot) {
-                final historyList = historySnapshot.data ?? [];
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        spreadRadius: 1,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      const Text('CHART', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('CHART', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                          Row(
-                            children: [
-                              Container(width: 10, height: 10, color: const Color(0xFF1E2460)),
-                              const SizedBox(width: 8),
-                              Text('ระดับน้ำ', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-                            ],
-                          ),
+                          Container(width: 10, height: 10, color: const Color(0xFF1E2460)),
+                          const SizedBox(width: 8),
+                          Text('ระดับน้ำ', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                         ],
                       ),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        height: 200,
-                        child: historyList.isEmpty
-                            ? const Center(child: Text('ไม่มีข้อมูลประวัติ'))
-                            : BarChart(
-                                BarChartData(
-                                  alignment: BarChartAlignment.spaceAround,
-                                  maxY: 100,
-                                  barTouchData: BarTouchData(enabled: false),
-                                  titlesData: FlTitlesData(
-                                    show: true,
-                                    bottomTitles: AxisTitles(
-                                      sideTitles: SideTitles(
-                                        showTitles: true,
-                                        getTitlesWidget: (value, meta) {
-                                          if (value.toInt() >= 0 && value.toInt() < historyList.length) {
-                                            return Padding(
-                                              padding: const EdgeInsets.only(top: 8.0),
-                                              child: Text(
-                                                DateFormat('HH.mm').format(historyList[value.toInt()].time),
-                                                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                                              ),
-                                            );
-                                          }
-                                          return const SizedBox.shrink();
-                                        },
-                                      ),
-                                    ),
-                                    leftTitles: AxisTitles(
-                                      sideTitles: SideTitles(
-                                        showTitles: true,
-                                        reservedSize: 30,
-                                        getTitlesWidget: (value, meta) {
-                                          if (value % 10 == 0) return Text(value.toInt().toString(), style: TextStyle(fontSize: 12, color: Colors.grey[600]));
-                                          return const SizedBox.shrink();
-                                        },
-                                      ),
-                                    ),
-                                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                  ),
-                                  gridData: FlGridData(
-                                    show: true,
-                                    drawVerticalLine: false,
-                                    horizontalInterval: 10,
-                                    getDrawingHorizontalLine: (value) => FlLine(color: Colors.grey[300], strokeWidth: 1), 
-                                  ),
-                                  borderData: FlBorderData(
-                                    show: true,
-                                    border: Border(
-                                      bottom: BorderSide(color: Colors.grey[400]!, width: 1),
-                                      left: BorderSide(color: Colors.grey[400]!, width: 1),
-                                      top: BorderSide.none,
-                                      right: BorderSide.none,
-                                    )
-                                  ),
-                                  barGroups: historyList.asMap().entries.map((entry) {
-                                    return BarChartGroupData(
-                                      x: entry.key,
-                                      barRods: [
-                                        BarChartRodData(
-                                          toY: entry.value.level,
-                                          color: const Color(0xFF1E2460), 
-                                          width: 18,
-                                          borderRadius: BorderRadius.zero, 
-                                        ),
-                                      ],
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                      ),
                     ],
                   ),
-                );
-              },
-            ),
-          ],
-        );
-      },
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    height: 200,
+                    child: historyList.isEmpty
+                        ? const Center(child: Text('ไม่มีข้อมูลประวัติ'))
+                        : BarChart(
+                            BarChartData(
+                              alignment: BarChartAlignment.spaceAround,
+                              maxY: 100,
+                              barTouchData: BarTouchData(enabled: false),
+                              titlesData: FlTitlesData(
+                                show: true,
+                                bottomTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    getTitlesWidget: (value, meta) {
+                                      if (value.toInt() >= 0 && value.toInt() < historyList.length) {
+                                        return Padding(
+                                          padding: const EdgeInsets.only(top: 8.0),
+                                          child: Text(
+                                            DateFormat('HH.mm').format(historyList[value.toInt()].time),
+                                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                          ),
+                                        );
+                                      }
+                                      return const SizedBox.shrink();
+                                    },
+                                  ),
+                                ),
+                                leftTitles: AxisTitles(
+                                  sideTitles: SideTitles(
+                                    showTitles: true,
+                                    reservedSize: 30,
+                                    getTitlesWidget: (value, meta) {
+                                      if (value % 10 == 0) return Text(value.toInt().toString(), style: TextStyle(fontSize: 12, color: Colors.grey[600]));
+                                      return const SizedBox.shrink();
+                                    },
+                                  ),
+                                ),
+                                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                              ),
+                              gridData: FlGridData(
+                                show: true,
+                                drawVerticalLine: false,
+                                horizontalInterval: 10,
+                                getDrawingHorizontalLine: (value) => FlLine(color: Colors.grey[300], strokeWidth: 1), 
+                              ),
+                              borderData: FlBorderData(
+                                show: true,
+                                border: Border(
+                                  bottom: BorderSide(color: Colors.grey[400]!, width: 1),
+                                  left: BorderSide(color: Colors.grey[400]!, width: 1),
+                                  top: BorderSide.none,
+                                  right: BorderSide.none,
+                                )
+                              ),
+                              barGroups: historyList.asMap().entries.map((entry) {
+                                return BarChartGroupData(
+                                  x: entry.key,
+                                  barRods: [
+                                    BarChartRodData(
+                                      toY: entry.value.level,
+                                      color: const Color(0xFF1E2460), 
+                                      width: 18,
+                                      borderRadius: BorderRadius.zero, 
+                                    ),
+                                  ],
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
