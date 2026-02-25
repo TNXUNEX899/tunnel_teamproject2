@@ -13,7 +13,7 @@ class SearchBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: 50, // ระยะห่างจากขอบจอบน
+      top: 50,
       left: 16,
       right: 16,
       child: Container(
@@ -30,14 +30,12 @@ class SearchBarWidget extends StatelessWidget {
             if (textEditingValue.text.isEmpty) {
               return const Iterable<Map<String, dynamic>>.empty();
             }
-            // ค้นหาชื่อสถานที่ที่ตรงกับคำค้นหา
             return locations.where((element) => element['name']
                 .toString()
                 .toLowerCase()
                 .contains(textEditingValue.text.toLowerCase()));
           },
           onSelected: (option) {
-            // ซ่อน Keyboard เมื่อเลือกเสร็จ
             FocusScope.of(context).unfocus();
             onSelected(option);
           },
@@ -46,7 +44,7 @@ class SearchBarWidget extends StatelessWidget {
               controller: controller,
               focusNode: focusNode,
               decoration: const InputDecoration(
-                hintText: 'ค้นหาสถานที่...',
+                hintText: 'ค้นหาอุโมงค์',
                 prefixIcon: Icon(Icons.search, color: Colors.grey),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(vertical: 15),

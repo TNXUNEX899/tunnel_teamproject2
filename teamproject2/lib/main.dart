@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:teamproject2/screens/open_map.dart';
-import 'package:teamproject2/provider/current_location_provider.dart'; 
+import 'package:provider/provider.dart';
+import 'package:teamproject2/provider/current_location_provider.dart';
+import 'package:teamproject2/screens/splash_screen.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  // 1. Initialized ตะกร้าของ Flutter และ Firebase
+  // 1. Initialized ตัวเชื่อมของ Flutter และ Firebase
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
-  // 2. เอา Provider ครอบไว้บนสุดของแอป (ครอบ MyApp)
+
+  // 2. เอา Provider ครอบไว้บนสุดของแอป (ครอบ MyApp) เพื่อให้แอปดึงตำแหน่ง GPS ได้ทุกหน้า
   runApp(
     MultiProvider(
       providers: [
@@ -28,15 +28,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 3. มี MaterialApp แค่ตัวเดียว
     return MaterialApp(
-      title: 'Flood Tunnel Alert',
-      debugShowCheckedModeBanner: false, // ปิดแถบ Debug มุมขวาบน
+      debugShowCheckedModeBanner: false, // ปิดแถบ Debug สีแดงมุมขวาบน
+      title: 'Tunnel App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1E2460)),
         useMaterial3: true,
       ),
-      home: const OpenMap(), // กำหนดให้หน้า OpenMap เป็นหน้าแรกของแอป
+      // ⭐️ เปลี่ยนหน้าแรกเป็น SplashScreen แทน OpenMap
+      home: const SplashScreen(), 
     );
   }
 }

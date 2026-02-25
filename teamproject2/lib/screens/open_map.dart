@@ -3,7 +3,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:teamproject2/provider/current_location_provider.dart';
 import 'package:teamproject2/utils/utils.dart';
-
 import 'package:teamproject2/utils/tunnel_marker_manager.dart';
 import 'package:teamproject2/widgets/weather_dashboard_widget.dart';
 import 'package:teamproject2/widgets/dashboard_widget.dart';
@@ -25,6 +24,8 @@ class _OpenMapState extends State<OpenMap> {
   Set<Marker> _currentMarkers = {};
   late TunnelMarkerManager _markerManager;
 
+  final DraggableScrollableController _sheetController = DraggableScrollableController();
+
   @override
   void initState() {
     super.initState();
@@ -39,14 +40,25 @@ class _OpenMapState extends State<OpenMap> {
           selectedUmongId = id;
           selectedLocationName = name;
         });
+        
+        if (_sheetController.isAttached) {
+          _sheetController.animateTo(
+            0.45,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+          );
+        }
       },
     );
     
-    _markerManager.startListening();
+    _markerManager.loadCustomPins().then((_) {
+      _markerManager.startListening();
+    });
   }
 
   @override
   void dispose() {
+    _sheetController.dispose();
     _markerManager.dispose();
     super.dispose();
   }
@@ -59,10 +71,20 @@ class _OpenMapState extends State<OpenMap> {
       selectedUmongId = location['id'];
       selectedLocationName = location['name'];
     });
+
+    if (_sheetController.isAttached) {
+      _sheetController.animateTo(
+        0.45,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    bool isShowingWeather = selectedUmongId == null;
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: Consumer<CurrentLocationProvider>(
@@ -85,17 +107,26 @@ class _OpenMapState extends State<OpenMap> {
                 onMapCreated: (controller) => mapController = controller,
                 initialCameraPosition: CameraPosition(
                   target: locationProvider.currentLocation,
-                  zoom: 12,
+                  zoom: 15,
                 ),
                 myLocationEnabled: true,
-                myLocationButtonEnabled: false,
+                myLocationButtonEnabled: false, // เราปิดของเดิมไว้เพื่อใช้ปุ่มที่เราแต่งเอง
                 mapType: MapType.normal,
                 markers: _currentMarkers,
                 onTap: (LatLng) {
+                  FocusScope.of(context).unfocus(); // ซ่อนแป้นพิมพ์ถ้าเปิดอยู่
                   setState(() {
                     selectedUmongId = null;
                     selectedLocationName = null;
                   });
+                  
+                  if (_sheetController.isAttached) {
+                    _sheetController.animateTo(
+                      0.40,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOutCubic,
+                    );
+                  }
                 },
               ),
 
@@ -104,10 +135,38 @@ class _OpenMapState extends State<OpenMap> {
                 onSelected: _goToLocation,
               ),
 
+              // ⭐️ เพิ่มปุ่ม "กลับตำแหน่งปัจจุบัน" ตรงนี้ครับ
+              Positioned(
+                top: 130, // ระยะห่างจากด้านบน (ให้อยู่ใต้ช่องค้นหาพอดี)
+                right: 16,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black26, blurRadius: 8, spreadRadius: 1)
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.my_location, color: Color(0xFF5D7B93)), // ใช้สีโทนเดียวกับ UI สภาพอากาศ
+                    onPressed: () {
+                      // สั่งให้กล้องบินกลับไปที่พิกัดปัจจุบัน
+                      mapController?.animateCamera(
+                        CameraUpdate.newLatLngZoom(
+                          locationProvider.currentLocation, // ดึงพิกัดจาก GPS
+                          16.0, // ระดับการซูม (ยิ่งมากยิ่งใกล้)
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+
               DraggableScrollableSheet(
-                initialChildSize: 0.35, 
-                minChildSize: 0.15,
-                maxChildSize: 0.9,
+                controller: _sheetController,
+                initialChildSize: isShowingWeather ? 0.40 : 0.45, 
+                minChildSize: 0.05, 
+                maxChildSize: isShowingWeather ? 0.40 : 0.70, 
                 builder: (BuildContext context, ScrollController scrollController) {
                   return Container(
                     decoration: BoxDecoration(
@@ -126,7 +185,7 @@ class _OpenMapState extends State<OpenMap> {
                           ),
                         ),
                         
-                        if (selectedUmongId == null) 
+                        if (isShowingWeather) 
                            const WeatherDashboardWidget()
                         else 
                            DashboardWidget(
@@ -134,7 +193,7 @@ class _OpenMapState extends State<OpenMap> {
                              locationName: selectedLocationName ?? '',
                            ),
                               
-                        const SizedBox(height: 32),
+                        SizedBox(height: isShowingWeather ? 0 : 16), 
                       ],
                     ),
                   );
