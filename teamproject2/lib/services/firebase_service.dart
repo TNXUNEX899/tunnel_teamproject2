@@ -54,16 +54,25 @@ class FirebaseService {
         .limitToLast(6) 
         .onValue
         .map((event) {
+          
+      // สั่งให้ล้างประวัติเก่าทิ้งทุกครั้งที่มีข้อมูลใหม่เข้ามา
+      cleanOldHistory(umongId);
+
       final List<WaterLevelData> chartData = [];
       final data = event.snapshot.value as Map<dynamic, dynamic>?;
 
       if (data != null) {
         var sortedEntries = data.entries.toList()
-          ..sort((a, b) => (a.value['timestamp'] as int).compareTo(b.value['timestamp'] as int));
+          ..sort((a, b) {
+            num timeA = a.value['timestamp'] ?? 0;
+            num timeB = b.value['timestamp'] ?? 0;
+            return timeA.compareTo(timeB);
+          });
 
         for (var entry in sortedEntries) {
+          num timestamp = entry.value['timestamp'] ?? 0;
           chartData.add(WaterLevelData(
-            time: DateTime.fromMillisecondsSinceEpoch(entry.value['timestamp']),
+            time: DateTime.fromMillisecondsSinceEpoch(timestamp.toInt()),
             level: (entry.value['percent'] ?? 0).toDouble(),
           ));
         }
@@ -77,15 +86,21 @@ class FirebaseService {
     try {
       final historyRef = _dbRef.child(umongId).child('history');
       final snapshot = await historyRef.get();
+      
       if (snapshot.exists) {
         Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
+        
         if (data.length > 6) {
           var entries = data.entries.toList()
-            ..sort((a, b) => (a.value['timestamp'] as int).compareTo(b.value['timestamp'] as int));
+            ..sort((a, b) {
+              num timeA = a.value['timestamp'] ?? 0;
+              num timeB = b.value['timestamp'] ?? 0;
+              return timeA.compareTo(timeB);
+            });
           
           int itemsToDelete = entries.length - 6;
           for (int i = 0; i < itemsToDelete; i++) {
-            await historyRef.child(entries[i].key).remove();
+            await historyRef.child(entries[i].key).remove(); 
           }
         }
       }
