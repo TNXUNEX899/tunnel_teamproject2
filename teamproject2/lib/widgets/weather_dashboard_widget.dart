@@ -16,39 +16,31 @@ class _WeatherDashboardWidgetState extends State<WeatherDashboardWidget> {
 
   final Color _primaryTextColor = const Color(0xFF5D7B93);
 
-  // ⭐️ ฟังก์ชันเช็คสภาพอากาศเพื่อเปลี่ยนรูปภาพ (อัปเดตชื่อไฟล์ตามที่คุณเซฟมา)
   String _getWeatherIconAsset(String conditionText, bool isDay) {
     String condition = conditionText.toLowerCase();
     
-    // 1. กลุ่มพายุฟ้าคะนอง
     if (condition.contains('thunder') || condition.contains('storm')) {
-      if (condition.contains('rain')) return 'assets/stromrain.png'; // ใช้ชื่อไฟล์ stromrain.png 
+      if (condition.contains('rain')) return 'assets/stromrain.png'; 
       return 'assets/thunder.png';
     } 
-    // 2. กลุ่มฝนตกประปราย / เบาๆ (แยกกลางวัน-กลางคืน)
     else if (condition.contains('patchy') || condition.contains('light')) {
       if (condition.contains('rain') || condition.contains('drizzle')) {
         return isDay ? 'assets/sunrain.png' : 'assets/moonrain.png';
       }
     }
-    // 3. กลุ่มฝนตกหนัก/ปานกลาง (ไม่มีแดด/พระจันทร์)
     else if (condition.contains('rain') || condition.contains('shower')) {
       return 'assets/rain.png';
     } 
-    // 4. กลุ่มมีเมฆบางส่วน (แยกกลางวัน-กลางคืน)
     else if (condition.contains('partly cloudy')) {
       return isDay ? 'assets/suncloud.png' : 'assets/mooncloud.png';
     }
-    // 5. กลุ่มมีเมฆมาก / หมอกลงจัด
     else if (condition.contains('cloud') || condition.contains('overcast') || condition.contains('fog') || condition.contains('mist')) {
       return 'assets/cloudy.png'; 
     } 
-    // 6. กลุ่มฟ้าโปร่ง / แดดจัด (แยกกลางวัน-กลางคืน)
     else if (condition.contains('clear') || condition.contains('sunny')) {
       return isDay ? 'assets/sun.png' : 'assets/moonstar.png';
     }
     
-    // ค่าเริ่มต้น
     return isDay ? 'assets/sun.png' : 'assets/moonstar.png';
   }
 
@@ -83,14 +75,12 @@ class _WeatherDashboardWidgetState extends State<WeatherDashboardWidget> {
             final temp = current['temp_c'].toInt();
             final conditionText = current['condition']['text'];
             
-            // ⭐️ ดึงค่าสถานะกลางวัน/กลางคืน (1 = กลางวัน, 0 = กลางคืน)
             final isDay = current['is_day'] == 1; 
             
             final windKmh = current['wind_kph'];
             final humidity = current['humidity'];
             final uv = current['uv'];
 
-            // ⭐️ เรียกฟังก์ชันโดยส่งตัวแปร isDay พ่วงเข้าไปด้วย
             final weatherAssetPath = _getWeatherIconAsset(conditionText, isDay);
 
             return Container(
@@ -114,25 +104,33 @@ class _WeatherDashboardWidgetState extends State<WeatherDashboardWidget> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.orange.withOpacity(0.2), 
-                                blurRadius: 40,
-                                spreadRadius: 10,
+                        // ⭐️ ใช้ Stack เพื่อซ้อนแสงเงาไว้หลังรูป โดยไม่ตัดขอบรูป
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // ชั้นที่ 1: แสง Glow สีส้ม (ทำเป็นวงกลมเล็กๆ ซ่อนไว้ข้างหลัง)
+                            Container(
+                              width: 60, 
+                              height: 60,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.orange.withOpacity(0.25), 
+                                    blurRadius: 35,
+                                    spreadRadius: 15,
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          child: ClipOval(
-                            child: Image.asset(
-                              weatherAssetPath, // ⭐️ ใช้ตัวแปรที่ดึงชื่อไฟล์มาแล้ว
+                            ),
+                            // ชั้นที่ 2: รูปภาพสภาพอากาศ (โชว์เต็มใบ ไม่มีการตัดกรอบ)
+                            Image.asset(
+                              weatherAssetPath, 
                               width: 100,
                               height: 100,
-                              fit: BoxFit.cover,
+                              fit: BoxFit.contain,
                             ),
-                          ),
+                          ],
                         ),
                         
                         const SizedBox(width: 24),

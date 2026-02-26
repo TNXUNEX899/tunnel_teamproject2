@@ -15,11 +15,33 @@ class DashboardWidget extends StatefulWidget {
 class _DashboardWidgetState extends State<DashboardWidget> {
   final FirebaseService _firebaseService = FirebaseService();
 
+  late Stream<UmongStatus> _statusStream;
+  late Stream<List<WaterLevelData>> _historyStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _initStreams(); 
+  }
+
+  @override
+  void didUpdateWidget(DashboardWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.umongId != widget.umongId) {
+      _initStreams();
+    }
+  }
+
+  void _initStreams() {
+    _statusStream = _firebaseService.getRealtimeStatus(widget.umongId);
+    _historyStream = _firebaseService.getHistoryStream(widget.umongId);
+  }
+
   Color _mapStatusColor(String colorStr) {
     switch (colorStr.toUpperCase()) {
-      case 'RED': return Colors.redAccent;
-      case 'YELLOW': return Colors.orangeAccent;
-      case 'GREEN': return Colors.greenAccent[400] ?? Colors.green; 
+      case 'RED': return const Color(0xFFDF2B2B);    // สีแดง
+      case 'YELLOW': return const Color(0xFFF2C94C); // สีเหลือง
+      case 'GREEN': return const Color(0xFF3DCF4E);  // สีเขียว
       default: return Colors.grey;
     }
   }
@@ -37,7 +59,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   Widget build(BuildContext context) {
     final currentTime = DateFormat('HH:mm').format(DateTime.now());
 
-    // ⭐️ เอา StreamBuilder อันใหญ่ออกไป แล้ววาด Column กับกล่องขาวรอไว้เลย
     return Column(
       children: [
         // --- ส่วนบน: สถานะปัจจุบัน ---
@@ -60,13 +81,14 @@ class _DashboardWidgetState extends State<DashboardWidget> {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.baseline, 
+                textBaseline: TextBaseline.alphabetic, 
                 children: [
                   Expanded(
                     child: Text(
                       widget.locationName, 
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      maxLines: 2,
+                      maxLines: 2, 
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -79,11 +101,10 @@ class _DashboardWidgetState extends State<DashboardWidget> {
               ),
               const SizedBox(height: 24),
               
-              // ⭐️ ย้าย StreamBuilder มาครอบเฉพาะส่วนที่จะเปลี่ยนค่า (กล่องสี + ตัวเลข)
               StreamBuilder<UmongStatus>(
-                stream: _firebaseService.getRealtimeStatus(widget.umongId),
+                stream: _statusStream,
                 builder: (context, statusSnapshot) {
-                  if (statusSnapshot.connectionState == ConnectionState.waiting) {
+                  if (statusSnapshot.connectionState == ConnectionState.waiting && !statusSnapshot.hasData) {
                     return const SizedBox(
                       height: 140, 
                       child: Center(child: CircularProgressIndicator())
@@ -99,11 +120,12 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                   return Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 400),
                         width: 140,
                         height: 140,
                         decoration: BoxDecoration(
-                          color: statusColor, // ⭐️ สีเปลี่ยนตรงนี้แบบนุ่มๆ
+                          color: statusColor, 
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Column(
@@ -123,7 +145,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                             const Text('status', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 8),
                             Text(
-                              'ปริมาตรน้ำ : ${percent.toStringAsFixed(1)} %', // ⭐️ ตัวเลขเปลี่ยนตรงนี้
+                              'ปริมาตรน้ำ : ${percent.toStringAsFixed(1)} %', 
                               style: const TextStyle(fontSize: 16),
                             ),
                             const SizedBox(height: 8),
@@ -147,9 +169,9 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         
         const SizedBox(height: 16),
 
-        // --- ส่วนล่าง: กราฟประวัติ (แยก StreamBuilder อิสระแล้ว) ---
+        // --- ส่วนล่าง: กราฟประวัติ ---
         StreamBuilder<List<WaterLevelData>>(
-          stream: _firebaseService.getHistoryStream(widget.umongId),
+          stream: _historyStream, 
           builder: (context, historySnapshot) {
             final historyList = historySnapshot.data ?? [];
             return Container(
@@ -189,7 +211,8 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                         ? const Center(child: Text('ไม่มีข้อมูลประวัติ'))
                         : BarChart(
                             BarChartData(
-                              alignment: BarChartAlignment.spaceAround,
+                              alignment: BarChartAlignment.start, 
+                              groupsSpace: 35, // ⭐️ เพิ่มระยะห่างระหว่างแท่งตรงนี้
                               maxY: 100,
                               barTouchData: BarTouchData(enabled: false),
                               titlesData: FlTitlesData(
@@ -224,11 +247,8 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                 topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                                 rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                               ),
-                              gridData: FlGridData(
-                                show: true,
-                                drawVerticalLine: false,
-                                horizontalInterval: 10,
-                                getDrawingHorizontalLine: (value) => FlLine(color: Colors.grey[300], strokeWidth: 1), 
+                              gridData: const FlGridData(
+                                show: false, // เอาเส้นแนวนอนออก
                               ),
                               borderData: FlBorderData(
                                 show: true,
@@ -246,7 +266,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                     BarChartRodData(
                                       toY: entry.value.level,
                                       color: const Color(0xFF1E2460), 
-                                      width: 18,
+                                      width: 26, // ⭐️ ปรับความกว้างแท่งให้อ้วนขึ้นเป็น 26
                                       borderRadius: BorderRadius.zero, 
                                     ),
                                   ],
