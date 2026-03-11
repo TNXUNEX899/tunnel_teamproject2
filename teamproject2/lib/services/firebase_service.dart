@@ -1,14 +1,14 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'dart:async';
 
-// 1. Model สำหรับข้อมูลกราฟ
+//Model กราฟ
 class WaterLevelData {
   final DateTime time;
   final double level;
   WaterLevelData({required this.time, required this.level});
 }
 
-// 2. Model สำหรับสถานะปัจจุบัน (ตรงกับ Firebase 100%)
+//Model สถานะปัจจุบัน
 class UmongStatus {
   final double lat;
   final double lng;
@@ -30,7 +30,7 @@ class UmongStatus {
 class FirebaseService {
   final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
 
-  // ดึงสถานะปัจจุบัน (Real-time)
+  // ดึงสถานะ
   Stream<UmongStatus> getRealtimeStatus(String umongId) {
     return _dbRef.child(umongId).onValue.map((event) {
       final data = event.snapshot.value as Map<dynamic, dynamic>? ?? {};
@@ -45,7 +45,7 @@ class FirebaseService {
     });
   }
 
-  // ดึงประวัติ (History) สำหรับวาดกราฟแท่ง
+  // ดึงประวัติ
   Stream<List<WaterLevelData>> getHistoryStream(String umongId) {
     return _dbRef
         .child(umongId)
@@ -81,7 +81,7 @@ class FirebaseService {
     });
   }
 
-  // ล้างประวัติที่เกิน 6 แท่ง (FIFO)
+  // ล้างประวัติที่เกิน 6 แท่ง
   Future<void> cleanOldHistory(String umongId) async {
     try {
       final historyRef = _dbRef.child(umongId).child('history');

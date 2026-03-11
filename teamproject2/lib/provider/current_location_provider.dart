@@ -4,7 +4,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class CurrentLocationProvider extends ChangeNotifier {
-  //default : กรุงเทพ
   LatLng _currentLocation = LatLng(13.7278, 100.5241); // ค่าเริ่มต้นของตำแหน่งปัจจุบัน
   bool _isLoading = true;
   String _errorMessage = '';

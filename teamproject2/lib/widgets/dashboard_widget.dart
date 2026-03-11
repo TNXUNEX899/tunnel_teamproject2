@@ -212,7 +212,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                         : BarChart(
                             BarChartData(
                               alignment: BarChartAlignment.start, 
-                              groupsSpace: 35, // ⭐️ เพิ่มระยะห่างระหว่างแท่งตรงนี้
+                              groupsSpace: 35,
                               maxY: 100,
                               barTouchData: BarTouchData(enabled: false),
                               titlesData: FlTitlesData(
@@ -248,7 +248,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                 rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                               ),
                               gridData: const FlGridData(
-                                show: false, // เอาเส้นแนวนอนออก
+                                show: false, 
                               ),
                               borderData: FlBorderData(
                                 show: true,
@@ -266,7 +266,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                     BarChartRodData(
                                       toY: entry.value.level,
                                       color: const Color(0xFF1E2460), 
-                                      width: 26, // ⭐️ ปรับความกว้างแท่งให้อ้วนขึ้นเป็น 26
+                                      width: 26, 
                                       borderRadius: BorderRadius.zero, 
                                     ),
                                   ],

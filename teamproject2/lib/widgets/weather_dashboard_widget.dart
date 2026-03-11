@@ -104,11 +104,9 @@ class _WeatherDashboardWidgetState extends State<WeatherDashboardWidget> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // ⭐️ ใช้ Stack เพื่อซ้อนแสงเงาไว้หลังรูป โดยไม่ตัดขอบรูป
                         Stack(
                           alignment: Alignment.center,
                           children: [
-                            // ชั้นที่ 1: แสง Glow สีส้ม (ทำเป็นวงกลมเล็กๆ ซ่อนไว้ข้างหลัง)
                             Container(
                               width: 60, 
                               height: 60,
@@ -123,7 +121,6 @@ class _WeatherDashboardWidgetState extends State<WeatherDashboardWidget> {
                                 ],
                               ),
                             ),
-                            // ชั้นที่ 2: รูปภาพสภาพอากาศ (โชว์เต็มใบ ไม่มีการตัดกรอบ)
                             Image.asset(
                               weatherAssetPath, 
                               width: 100,
@@ -170,7 +167,7 @@ class _WeatherDashboardWidgetState extends State<WeatherDashboardWidget> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildWeatherDetailItem(Icons.air, '$windKmh km/h'),
-                        _buildWeatherDetailItem(Icons.cloud, '$humidity %'),
+                        _buildWeatherDetailItem(Icons.water_drop, '$humidity %'),
                         _buildWeatherDetailItem(Icons.wb_sunny, '$uv of 10'),
                       ],
                     ),

@@ -110,11 +110,11 @@ class _OpenMapState extends State<OpenMap> {
                   zoom: 15,
                 ),
                 myLocationEnabled: true,
-                myLocationButtonEnabled: false, // เราปิดของเดิมไว้เพื่อใช้ปุ่มที่เราแต่งเอง
+                myLocationButtonEnabled: false, 
                 mapType: MapType.normal,
                 markers: _currentMarkers,
                 onTap: (LatLng) {
-                  FocusScope.of(context).unfocus(); // ซ่อนแป้นพิมพ์ถ้าเปิดอยู่
+                  FocusScope.of(context).unfocus(); 
                   setState(() {
                     selectedUmongId = null;
                     selectedLocationName = null;
@@ -135,9 +135,8 @@ class _OpenMapState extends State<OpenMap> {
                 onSelected: _goToLocation,
               ),
 
-              // ⭐️ เพิ่มปุ่ม "กลับตำแหน่งปัจจุบัน" ตรงนี้ครับ
               Positioned(
-                top: 130, // ระยะห่างจากด้านบน (ให้อยู่ใต้ช่องค้นหาพอดี)
+                top: 130, 
                 right: 16,
                 child: Container(
                   decoration: BoxDecoration(
@@ -148,13 +147,13 @@ class _OpenMapState extends State<OpenMap> {
                     ],
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.my_location, color: Color(0xFF5D7B93)), // ใช้สีโทนเดียวกับ UI สภาพอากาศ
+                    icon: const Icon(Icons.my_location, color: Color(0xFF5D7B93)),
                     onPressed: () {
-                      // สั่งให้กล้องบินกลับไปที่พิกัดปัจจุบัน
+                      //กลับไปที่พิกัดปัจจุบัน
                       mapController?.animateCamera(
                         CameraUpdate.newLatLngZoom(
-                          locationProvider.currentLocation, // ดึงพิกัดจาก GPS
-                          16.0, // ระดับการซูม (ยิ่งมากยิ่งใกล้)
+                          locationProvider.currentLocation, //ดึงพิกัดGPS
+                          16.0, //zoom
                         ),
                       );
                     },
